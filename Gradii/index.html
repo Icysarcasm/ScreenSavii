@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradii</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button id="fullscreen-btn">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 4H10V2H2V10H4V4ZM14 2V4H20V10H22V2H14ZM20 20H14V22H22V14H20V20ZM4 20V14H2V22H10V20H4Z" fill="white"/>
+        </svg>
+    </button>
+
+    <div class="controls">
+        <label for="color-amt">Colors:</label>
+        <select id="color-amt">
+            <option value="one">One</option>
+            <option value="two">Two</option>
+            <option value="three">Three</option>
+            <option value="four">Four</option>
+        </select>
+        <label for="speed-slider" id="speed-label">Speed: <span id="speed-value">15</span>s</label>
+        <input type="range" id="speed-slider" min="1" max="600" value="15">
+        <label for="color1">Color 1:</label>
+        <input type="color" id="color1" value="#ff7e5f">
+        <label for="color2" id="color2-label">Color 2:</label>
+        <input type="color" id="color2" value="#feb47b">
+        <label for="color3" id="color3-label">Color 3:</label>
+        <input type="color" id="color3" value="#ff7e5f">
+        <label for="color4" id="color4-label">Color 4:</label>
+        <input type="color" id="color4" value="#feb47b">
+        <label for="animation-type" id="animation-type-label">Animation Type:</label>
+        <select id="animation-type">
+            <option value="linear">Linear</option>
+            <option value="radial">Radial</option>
+        </select>
+    </div>
+
+    <script>
+        document.getElementById('fullscreen-btn').addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen();
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+
+        const speedSlider = document.getElementById('speed-slider');
+        const speedLabel = document.getElementById('speed-label');
+        const speedValue = document.getElementById('speed-value');
+        const color1Input = document.getElementById('color1');
+        const color2Input = document.getElementById('color2');
+        const color3Input = document.getElementById('color3');
+        const color4Input = document.getElementById('color4');
+        const color2Label = document.getElementById('color2-label');
+        const color3Label = document.getElementById('color3-label');
+        const color4Label = document.getElementById('color4-label');
+        const animationType = document.getElementById('animation-type');
+        const animationTypeLabel = document.getElementById('animation-type-label');
+        const colorAmt = document.getElementById('color-amt');
+        const body = document.body;
+
+        function updateGradient() {
+            const speed = speedSlider.value;
+            const color1 = color1Input.value;
+            const color2 = color2Input.value;
+            const color3 = color3Input.value;
+            const color4 = color4Input.value;
+            const type = animationType.value;
+            const colors = [color1];
+
+            if (colorAmt.value === 'two') {
+                colors.push(color2);
+            } else if (colorAmt.value === 'three') {
+                colors.push(color2, color3);
+            } else if (colorAmt.value === 'four') {
+                colors.push(color2, color3, color4);
+            }
+
+            if (colorAmt.value !== 'one') {
+                if (type === 'linear') {
+                    body.style.background = `linear-gradient(270deg, ${colors.join(', ')})`;
+                } else if (type === 'radial') {
+                    body.style.background = `radial-gradient(circle, ${colors.join(', ')})`;
+                }
+                body.style.backgroundSize = '400% 400%';
+                body.style.animation = `gradientShift ${speed}s ease infinite`;
+            } else {
+                body.style.background = color1;
+                body.style.animation = 'none';
+            }
+
+            color2Input.style.display = colorAmt.value !== 'one' ? 'inline-block' : 'none';
+            color2Label.style.display = colorAmt.value !== 'one' ? 'inline' : 'none';
+            color3Input.style.display = colorAmt.value === 'three' || colorAmt.value === 'four' ? 'inline-block' : 'none';
+            color3Label.style.display = colorAmt.value === 'three' || colorAmt.value === 'four' ? 'inline' : 'none';
+            color4Input.style.display = colorAmt.value === 'four' ? 'inline-block' : 'none';
+            color4Label.style.display = colorAmt.value === 'four' ? 'inline' : 'none';
+            speedSlider.style.display = colorAmt.value !== 'one' ? 'block' : 'none';
+            speedLabel.style.display = colorAmt.value !== 'one' ? 'block' : 'none';
+            animationType.style.display = colorAmt.value !== 'one' ? 'block' : 'none';
+            animationTypeLabel.style.display = colorAmt.value !== 'one' ? 'block' : 'none';
+
+            speedValue.textContent = speed;
+        }
+
+        speedSlider.addEventListener('input', updateGradient);
+        color1Input.addEventListener('input', updateGradient);
+        color2Input.addEventListener('input', updateGradient);
+        color3Input.addEventListener('input', updateGradient);
+        color4Input.addEventListener('input', updateGradient);
+        animationType.addEventListener('change', updateGradient);
+        colorAmt.addEventListener('change', updateGradient);
+
+        updateGradient();
+
+        // Fade out elements after inactivity
+        let timeout;
+        const elements = document.querySelectorAll('#fullscreen-btn, #link-btn, .controls');
+
+        function resetTimer() {
+            clearTimeout(timeout);
+            elements.forEach(el => el.classList.remove('fade-out'));
+            document.body.style.cursor = 'default';
+            timeout = setTimeout(() => {
+                elements.forEach(el => el.classList.add('fade-out'));
+                document.body.style.cursor = 'none';
+            }, 3000); // 3 seconds of inactivity
+        }
+
+        window.addEventListener('mousemove', resetTimer);
+        window.addEventListener('keydown', resetTimer);
+
+        resetTimer();
+    </script>
+</body>
+</html>

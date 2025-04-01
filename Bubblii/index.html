@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bubble Animation</title>
+    <style>
+        body {
+            background-color: #2b0000; /* Dark red background */
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars */
+            position: relative;
+            height: 100vh;
+        }
+        .bubble {
+            position: absolute;
+            top: 0; /* Start from the top */
+            background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
+            border-radius: 50%;
+            animation: fall ease-in infinite, drift ease-in-out infinite; /* Combine fall and drift animations */
+        }
+        @keyframes fall {
+            0% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh); /* Move bubble to the bottom */
+                opacity: 0;
+            }
+        }
+        @keyframes drift {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            50% {
+                transform: translateX(20px); /* Slight horizontal movement */
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+        // Function to create a bubble
+        function createBubble() {
+            const bubble = document.createElement('div');
+            const size = Math.random() * 50 + 10; // Random size between 10px and 60px
+            bubble.classList.add('bubble');
+            bubble.style.width = `${size}px`;
+            bubble.style.height = `${size}px`;
+            bubble.style.left = `${Math.random() * 100}vw`; // Random horizontal position
+            bubble.style.animationDuration = `${Math.random() * 3 + 2}s`; // Randomize fall duration
+            bubble.style.animationDelay = `${Math.random()}s`; // Randomize delay
+            document.body.appendChild(bubble);
+
+            // Remove the bubble after the animation ends to free up memory
+            bubble.addEventListener('animationend', () => {
+                bubble.remove();
+            });
+        }
+
+        // Create bubbles at regular intervals
+        setInterval(createBubble, 10); // Create a bubble every 10ms
+    </script>
+</body>
+</html>

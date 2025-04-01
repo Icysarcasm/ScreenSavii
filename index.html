@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScreenSavii</title>
+    <style>
+        body {
+            background-color: #2b0000; /* Dark red background */
+            color: #ffffff; /* White text */
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; /* Center vertically */
+            align-items: center; /* Center horizontally */
+            height: 100vh; /* Full viewport height */
+        }
+        h1 {
+            color: #ff4d4d; /* Light red for the heading */
+            text-align: center;
+            font-size: 3.5rem; /* Larger font size for the title */
+            margin-bottom: 20px;
+        }
+        .carousel-container {
+            position: relative;
+            width: 80%; /* Full width for the carousel container */
+        }
+        .carousel {
+            display: flex;
+            overflow-x: auto;
+            gap: 20px;
+            padding: 20px;
+            scroll-snap-type: x mandatory;
+            width: 100%; /* Full width for the carousel */
+        }
+        .carousel::before,
+        .carousel::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 50px; /* Width of the gradient fade */
+            z-index: 1;
+            pointer-events: none;
+        }
+        .carousel::before {
+            left: 0;
+            background: linear-gradient(to right, #2b0000, transparent);
+        }
+        .carousel::after {
+            right: 0;
+            background: linear-gradient(to left, #2b0000, transparent);
+        }
+        .card {
+            flex: 0 0 300px;
+            background-color: #400000; /* Slightly lighter red for cards */
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            scroll-snap-align: center;
+            text-align: center;
+        }
+        .card a {
+            color: #ff9999; /* Light red for links */
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .card a:hover {
+            color: #ffffff; /* White on hover */
+            text-decoration: underline;
+        }
+        .card p {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #ffcccc; /* Light red for descriptions */
+        }
+    </style>
+</head>
+<body>
+    <h1>Subpage Links</h1>
+    <div class="carousel-container">
+        <div class="carousel">
+            <div class="card">
+                <a href="Rainfalli/">Rainfallii</a>
+                <p>Remember better times.</p>
+            </div>
+            <div class="card">
+                <a href="Bubblii/">Bubblii</a>
+                <p>Childlike wonder.</p>
+            </div>
+            <div class="card">
+                <a href="Gradii/">Gradii</a>
+                <p>Simple is Better.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

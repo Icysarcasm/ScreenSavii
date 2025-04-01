@@ -1,0 +1,52 @@
+body {
+    margin: 0;
+    overflow: hidden;
+    background: #f0f0f0; /* Default light background */
+    transition: background 0.3s ease;
+}
+
+.raindrop {
+    position: absolute;
+    top: -10px;
+    width: 2px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.5); /* Default dark raindrop */
+    animation: fall linear infinite;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh);
+    }
+}
+
+.slider-container, .dark-mode-container {
+    position: fixed;
+    bottom: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    border-radius: 5px;
+    color: white;
+    font-family: Arial, sans-serif;
+    transition: opacity 0.3s ease; /* Smooth transition for hiding/showing */
+}
+
+.slider-container {
+    left: 10%;
+}
+
+.dark-mode-container {
+    right: 10%;
+}
+
+#speed-slider, #dark-mode-toggle {
+    margin-left: 10px;
+}
+
+body.dark-mode {
+    background: #000; /* Dark mode background */
+}
+
+body.dark-mode .raindrop {
+    background: rgba(255, 255, 255, 0.5); /* White raindrops in dark mode */
+}
