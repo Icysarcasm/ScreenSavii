@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orbit Screensaver</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="screensaver"></canvas>
+    <script>
+        const canvas = document.getElementById('screensaver');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const stars = [];
+        const orbits = [];
+        const shootingStars = [];
+        const comets = [];
+        const galaxyParticles = [];
+        const numStars = 100;
+        const numOrbits = 5;
+        const numGalaxyParticles = 200;
+
+        // Variables for dynamic nebula pulsing
+        let nebulaOpacity = 0.3;
+        let nebulaDirection = 1;
+
+        // Create stars
+        for (let i = 0; i < numStars; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                radius: Math.random() * 2,
+                color: `rgba(255, 255, 255, ${Math.random()})`,
+                twinkleSpeed: Math.random() * 0.05
+            });
+        }
+
+        // Create orbits
+        for (let i = 0; i < numOrbits; i++) {
+            orbits.push({
+                centerX: canvas.width / 2,
+                centerY: canvas.height / 2,
+                radius: 50 + i * 50,
+                speed: 0.01 + Math.random() * 0.02,
+                angle: Math.random() * Math.PI * 2,
+                planetRadius: 10 + Math.random() * 10,
+                color: `hsl(${Math.random() * 360}, 70%, 50%)`
+            });
+        }
+
+        // Create shooting stars
+        function createShootingStar() {
+            shootingStars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height / 2,
+                length: Math.random() * 300 + 100,
+                speed: Math.random() * 10 + 5,
+                angle: Math.random() * Math.PI / 4,
+                opacity: Math.random() * 0.5 + 0.5
+            });
+        }
+
+        // Create comets
+        function createComet() {
+            comets.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                length: Math.random() * 200 + 100,
+                speed: Math.random() * 5 + 2,
+                angle: Math.random() * Math.PI / 2,
+                opacity: Math.random() * 0.5 + 0.5,
+                color: `hsl(${Math.random() * 360}, 70%, 50%)`
+            });
+        }
+
+        // Create galaxy effect
+        for (let i = 0; i < numGalaxyParticles; i++) {
+            galaxyParticles.push({
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                angle: Math.random() * Math.PI * 2,
+                distance: Math.random() * 300,
+                speed: Math.random() * 0.02 + 0.01,
+                size: Math.random() * 2,
+                color: `hsl(${Math.random() * 360}, 70%, 50%)`
+            });
+        }
+
+        function drawStars() {
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = star.color;
+                ctx.fill();
+
+                // Twinkle effect
+                star.radius += Math.sin(star.twinkleSpeed) * 0.02;
+            });
+        }
+
+        function drawOrbits() {
+            orbits.forEach(orbit => {
+                // Draw orbit path
+                ctx.beginPath();
+                ctx.arc(orbit.centerX, orbit.centerY, orbit.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                ctx.stroke();
+
+                // Update planet position
+                orbit.angle += orbit.speed;
+                const planetX = orbit.centerX + orbit.radius * Math.cos(orbit.angle);
+                const planetY = orbit.centerY + orbit.radius * Math.sin(orbit.angle);
+
+                // Draw planet
+                ctx.beginPath();
+                ctx.arc(planetX, planetY, orbit.planetRadius, 0, Math.PI * 2);
+                ctx.fillStyle = orbit.color;
+                ctx.fill();
+            });
+        }
+
+        function drawShootingStars() {
+            for (let i = shootingStars.length - 1; i >= 0; i--) {
+                const star = shootingStars[i];
+                ctx.beginPath();
+                ctx.moveTo(star.x, star.y);
+                ctx.lineTo(
+                    star.x - star.length * Math.cos(star.angle),
+                    star.y - star.length * Math.sin(star.angle)
+                );
+                ctx.strokeStyle = `rgba(255, 255, 255, ${star.opacity})`;
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Update shooting star position
+                star.x += star.speed * Math.cos(star.angle);
+                star.y += star.speed * Math.sin(star.angle);
+                star.opacity -= 0.01;
+
+                // Remove shooting star if it fades out
+                if (star.opacity <= 0) {
+                    shootingStars.splice(i, 1);
+                }
+            }
+        }
+
+        function drawComets() {
+            for (let i = comets.length - 1; i >= 0; i--) {
+                const comet = comets[i];
+                ctx.beginPath();
+                ctx.moveTo(comet.x, comet.y);
+                ctx.lineTo(
+                    comet.x - comet.length * Math.cos(comet.angle),
+                    comet.y - comet.length * Math.sin(comet.angle)
+                );
+                ctx.strokeStyle = `rgba(255, 255, 255, ${comet.opacity})`;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Update comet position
+                comet.x += comet.speed * Math.cos(comet.angle);
+                comet.y += comet.speed * Math.sin(comet.angle);
+                comet.opacity -= 0.005;
+
+                // Remove comet if it fades out
+                if (comet.opacity <= 0) {
+                    comets.splice(i, 1);
+                }
+            }
+        }
+
+        function drawGalaxy() {
+            galaxyParticles.forEach(particle => {
+                particle.angle += particle.speed;
+                const particleX = canvas.width / 2 + particle.distance * Math.cos(particle.angle);
+                const particleY = canvas.height / 2 + particle.distance * Math.sin(particle.angle);
+
+                ctx.beginPath();
+                ctx.arc(particleX, particleY, particle.size, 0, Math.PI * 2);
+                ctx.fillStyle = particle.color;
+                ctx.fill();
+            });
+        }
+
+        function drawBackgroundGradient() {
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, 'black');
+            gradient.addColorStop(1, 'darkblue');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Create nebula effect
+        function drawNebula() {
+            const nebulaGradient = ctx.createRadialGradient(
+                canvas.width / 2,
+                canvas.height / 2,
+                0,
+                canvas.width / 2,
+                canvas.height / 2,
+                canvas.width / 1.5
+            );
+            nebulaGradient.addColorStop(0, 'rgba(72, 61, 139, 0.3)'); // Dark slate blue
+            nebulaGradient.addColorStop(0.5, 'rgba(138, 43, 226, 0.2)'); // Blue violet
+            nebulaGradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); // Transparent
+            ctx.fillStyle = nebulaGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // Create dynamic pulsing nebula
+        function drawPulsingNebula() {
+            const nebulaGradient = ctx.createRadialGradient(
+                canvas.width / 2,
+                canvas.height / 2,
+                0,
+                canvas.width / 2,
+                canvas.height / 2,
+                canvas.width / 1.5
+            );
+            nebulaGradient.addColorStop(0, `rgba(72, 61, 139, ${nebulaOpacity})`); // Dark slate blue
+            nebulaGradient.addColorStop(0.5, `rgba(138, 43, 226, ${nebulaOpacity / 2})`); // Blue violet
+            nebulaGradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); // Transparent
+            ctx.fillStyle = nebulaGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Update nebula opacity for pulsing effect
+            nebulaOpacity += 0.005 * nebulaDirection;
+            if (nebulaOpacity >= 0.5 || nebulaOpacity <= 0.2) {
+                nebulaDirection *= -1;
+            }
+        }
+
+        // Add rotating galaxy core
+        function drawGalaxyCore() {
+            const coreRadius = 20;
+            const coreColor = `hsl(${Math.random() * 360}, 70%, 50%)`;
+            ctx.beginPath();
+            ctx.arc(canvas.width / 2, canvas.height / 2, coreRadius, 0, Math.PI * 2);
+            ctx.fillStyle = coreColor;
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = coreColor;
+            ctx.fill();
+            ctx.shadowBlur = 0; // Reset shadow
+        }
+
+        // Add star trails
+        function drawStarTrails() {
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.moveTo(star.x, star.y);
+                ctx.lineTo(star.x - star.twinkleSpeed * 10, star.y);
+                ctx.strokeStyle = star.color;
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            });
+        }
+
+        // Interactive mouse effect
+        let mouseX = canvas.width / 2;
+        let mouseY = canvas.height / 2;
+
+        canvas.addEventListener('mousemove', (event) => {
+            mouseX = event.clientX;
+            mouseY = event.clientY;
+        });
+
+        function drawInteractiveStars() {
+            stars.forEach(star => {
+                const dx = mouseX - star.x;
+                const dy = mouseY - star.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                if (distance < 100) {
+                    star.x += dx * 0.05;
+                    star.y += dy * 0.05;
+                }
+            });
+        }
+
+        // Update star colors dynamically
+        function updateStarColors() {
+            stars.forEach(star => {
+                const hue = Math.random() * 360;
+                star.color = `hsl(${hue}, 100%, 80%)`;
+            });
+        }
+
+        // Parallax effect for stars
+        function drawParallaxStars() {
+            stars.forEach(star => {
+                star.x += star.twinkleSpeed * 0.5;
+                if (star.x > canvas.width) star.x = 0;
+
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+                ctx.fillStyle = star.color;
+                ctx.fill();
+            });
+        }
+
+        function animate() {
+            drawBackgroundGradient();
+            drawPulsingNebula();
+            drawStars();
+            drawStarTrails();
+            drawOrbits();
+            drawShootingStars();
+            drawComets();
+            drawGalaxy();
+            drawGalaxyCore();
+            drawParallaxStars();
+            drawInteractiveStars();
+
+            // Randomly create shooting stars and comets
+            if (Math.random() < 0.01) {
+                createShootingStar();
+            }
+            if (Math.random() < 0.005) {
+                createComet();
+            }
+
+            // Update star colors occasionally
+            if (Math.random() < 0.01) {
+                updateStarColors();
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        // Resize canvas on window resize
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snowii</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #001f3f, #001f3f 50%, #011627);
+        }
+
+        canvas {
+            display: block;
+            transition: transform 0.1s ease-in-out;
+        }
+
+        #centerText {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 24px;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="snowCanvas"></canvas>
+    <div id="centerText">Press space to clear the snow.</div>
+    <script>
+        const canvas = document.getElementById('snowCanvas');
+        const ctx = canvas.getContext('2d');
+        const centerText = document.getElementById('centerText');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const columnWidth = 5;
+        const snowflakes = [];
+        const snowPile = Array(Math.ceil(canvas.width / columnWidth)).fill(0);
+
+        class Snowflake {
+            constructor(x, y, radius, speed, opacity) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.speed = speed;
+                this.opacity = opacity;
+            }
+
+            update() {
+                this.y += this.speed;
+
+                const columnIndex = Math.floor(this.x / columnWidth);
+                const groundLevel = canvas.height - snowPile[columnIndex];
+                if (this.y + this.radius >= groundLevel) {
+                    this.y = groundLevel - this.radius;
+                    snowPile[columnIndex] += this.radius;
+                    this.reset();
+                }
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -this.radius;
+                this.radius = Math.random() * 3 + 1;
+                this.speed = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.7 + 0.3;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+        function createSnowflakes() {
+            const count = 300;
+            for (let i = 0; i < count; i++) {
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const radius = Math.random() * 3 + 1;
+                const speed = Math.random() * 2 + 1;
+                const opacity = Math.random() * 0.7 + 0.3;
+                snowflakes.push(new Snowflake(x, y, radius, speed, opacity));
+            }
+        }
+
+        function drawSnowPile() {
+            ctx.fillStyle = 'white';
+            for (let i = 0; i < snowPile.length; i++) {
+                const height = snowPile[i];
+                if (height > 0) {
+                    ctx.fillRect(i * columnWidth, canvas.height - height, columnWidth, height);
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawSnowPile();
+            snowflakes.forEach(snowflake => {
+                snowflake.update();
+                snowflake.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+
+        function shakeScreen() {
+            canvas.style.transform = 'translateX(10px)';
+            setTimeout(() => canvas.style.transform = 'translateX(-10px)', 50);
+            setTimeout(() => canvas.style.transform = 'translateX(0)', 100);
+        }
+
+        function clearSnowPile() {
+            const particles = [];
+            for (let i = 0; i < snowPile.length; i++) {
+                const height = snowPile[i];
+                if (height > 0) {
+                    for (let j = 0; j < height; j++) {
+                        particles.push({
+                            x: i * columnWidth + columnWidth / 2,
+                            y: canvas.height - j,
+                            radius: Math.random() * 2 + 1,
+                            speedX: (Math.random() - 0.5) * 2,
+                            speedY: -Math.random() * 3 - 1,
+                            opacity: Math.random() * 0.7 + 0.3
+                        });
+                    }
+                }
+            }
+            snowPile.fill(0);
+
+            function animateParticles() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawSnowPile();
+                snowflakes.forEach(snowflake => snowflake.draw()); // Ensure snowflakes are still drawn
+                particles.forEach((particle, index) => {
+                    particle.x += particle.speedX;
+                    particle.y += particle.speedY;
+                    particle.opacity -= 0.01;
+                    if (particle.opacity <= 0) {
+                        particles.splice(index, 1);
+                    } else {
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = `rgba(255, 255, 255, ${particle.opacity})`;
+                        ctx.fill();
+                        ctx.closePath();
+                    }
+                });
+                if (particles.length > 0) {
+                    requestAnimationFrame(animateParticles);
+                }
+            }
+
+            animateParticles();
+        }
+
+        function fadeOutText() {
+            let opacity = 1;
+            const fadeInterval = setInterval(() => {
+                opacity -= 0.05;
+                if (opacity <= 0) {
+                    clearInterval(fadeInterval);
+                    centerText.style.display = 'none';
+                } else {
+                    centerText.style.opacity = opacity;
+                }
+            }, 50);
+        }
+
+        createSnowflakes();
+        animate();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            snowflakes.length = 0;
+            snowPile.length = Math.ceil(canvas.width / columnWidth);
+            snowPile.fill(0);
+            createSnowflakes();
+        });
+
+        window.addEventListener('keydown', (event) => {
+            if (event.code === 'Space') {
+                shakeScreen();
+                clearSnowPile();
+                fadeOutText();
+            }
+        });
+
+        setTimeout(() => {
+            fadeOutText();
+        }, 5000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codeii</title>
+    <style>
+        body {
+            margin: 0;
+            background-color: #000000;
+            color: #00ff00;
+            font-family: 'Monaco', Courier, monospace;
+            overflow: hidden;
+        }
+
+        #line-graph {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 100px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff00;
+        }
+        #code {
+            white-space: pre-wrap;
+            padding: 20px;
+            height: 100vh; /* Full viewport height */
+            overflow-y: hidden; /* Hide scrollbar */
+            box-sizing: border-box;
+        }
+        #stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #00ff00;
+            font-family: 'Monaco', Courier, monospace;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div id="code"></div>
+    <div id="stats">
+        <div id="network">Network: 0</div>
+        <div id="memory">Memory: 0</div>
+        <div id="cpu">CPU: 0</div>
+        <div id="disk">Disk: 0</div>
+        <div id="gpu">GPU: 0</div>
+    </div>
+    <canvas id="line-graph"></canvas>
+
+    <script>
+        const codeElement = document.getElementById('code');
+        let codeLines = [];
+
+        fetch('code.txt')
+            .then(response => response.text())
+            .then(data => {
+                codeLines = data.split('\n');
+            })
+            .catch(error => console.error('Error fetching code.txt:', error));
+    
+        let currentLine = 0;
+        let currentChar = 0;
+    
+        function typeCode() {
+            if (currentLine < codeLines.length) {
+                const line = codeLines[currentLine];
+                if (currentChar < line.length) {
+                    codeElement.textContent += line[currentChar];
+                    currentChar++;
+                } else {
+                    codeElement.textContent += '\n';
+                    currentChar = 0;
+                    currentLine++;
+                }
+                // Scroll to the bottom of the code element
+                codeElement.scrollTop = codeElement.scrollHeight;
+            } else {
+                currentLine = 0;
+                currentChar = 0;
+            }
+            setTimeout(typeCode, 1);
+        }
+    
+        typeCode();
+
+        function updateStats() {
+            const networkElement = document.getElementById('network');
+            const memoryElement = document.getElementById('memory');
+            const cpuElement = document.getElementById('cpu');
+            const diskElement = document.getElementById('disk');
+            const gpuElement = document.getElementById('gpu');
+
+            // Generate random numbers for stats
+            const randomNetwork = (Math.random() * 100).toFixed(2);
+            const randomMemory = (Math.random() * 100).toFixed(2);
+            const randomCPU = (Math.random() * 100).toFixed(2);
+            const randomDisk = (Math.random() * 100).toFixed(2);
+            const randomGPU = (Math.random() * 100).toFixed(2);
+
+            networkElement.textContent = `Network: ${randomNetwork}`;
+            memoryElement.textContent = `Memory: ${randomMemory}`;
+            cpuElement.textContent = `CPU: ${randomCPU}`;
+            diskElement.textContent = `Disk: ${randomDisk}`;
+            gpuElement.textContent = `GPU: ${randomGPU}`;
+
+            setTimeout(updateStats, 500); // Update every half second
+        }
+
+        updateStats();
+
+        const canvas = document.getElementById('line-graph');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 200;
+        canvas.height = 100;
+
+        const dataPoints = Array(20).fill(50); // Initialize with 20 points at 50
+
+        function drawGraph() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#00ff00';
+            ctx.lineWidth = 2;
+
+            dataPoints.forEach((point, index) => {
+                const x = (canvas.width / (dataPoints.length - 1)) * index;
+                const y = canvas.height - (point / 100) * canvas.height;
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+
+            ctx.stroke();
+        }
+
+        function updateGraph() {
+            dataPoints.shift(); // Remove the first point
+            dataPoints.push(Math.random() * 100); // Add a new random point
+            drawGraph();
+            setTimeout(updateGraph, 1000); // Update every second
+        }
+
+        drawGraph();
+        updateGraph();
+    </script>
+</body>
+</html>

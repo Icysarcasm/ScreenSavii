@@ -1,0 +1,286 @@
+            'use strict';  
+               
+             class Matrix {  
+               constructor(rows  cols) {  
+                 this.rows = rows;  
+                 this.cols = cols;  
+                 this.data = Array.from({ length: rows }  () => Array(cols).fill(0));  
+               }  
+               
+               static multiply(a  b) {  
+                 if (a.cols !== b.rows) {  
+                   throw new Error('Columns of A must match rows of B');  
+                 }  
+                 let result = new Matrix(a.rows  b.cols);  
+                 for (let i = 0; i < result.rows; i++) {  
+                   for (let j = 0; j < result.cols; j++) {  
+                     let sum = 0;  
+                     for (let k = 0; k < a.cols; k++) {  
+                       sum += a.data[i][k] * b.data[k][j];  
+                     }  
+                     result.data[i][j] = sum;  
+                   }  
+                 }  
+                 return result;  
+               }  
+               
+               randomize() {  
+                 this.data = this.data.map(row => row.map(() => Math.random() * 10));  
+               }  
+               
+               print() {  
+                 console.table(this.data);  
+               }  
+               
+               determinant() {  
+                 if (this.rows !== this.cols) {  
+                   throw new Error('Determinant can only be calculated for square matrices');  
+                 }  
+                 if (this.rows === 2) {  
+                   return this.data[0][0] * this.data[1][1] - this.data[0][1] * this.data[1][0];  
+                 }  
+                 let det = 0;  
+                 for (let i = 0; i < this.cols; i++) {  
+                   det += ((i % 2 === 0 ? 1 : -1) * this.data[0][i] * this.minor(0  i).determinant());  
+                 }  
+                 return det;  
+               }  
+               
+               minor(row  col) {  
+                 let result = new Matrix(this.rows - 1  this.cols - 1);  
+                 let minorRow = 0;  
+                 for (let i = 0; i < this.rows; i++) {  
+                   if (i === row) continue;  
+                   let minorCol = 0;  
+                   for (let j = 0; j < this.cols; j++) {  
+                     if (j === col) continue;  
+                     result.data[minorRow][minorCol] = this.data[i][j];  
+                     minorCol++;  
+                   }  
+                   minorRow++;  
+                 }  
+                 return result;  
+               }  
+               
+               inverse() {  
+                 if (this.rows !== this.cols) {  
+                   throw new Error('Inverse can only be calculated for square matrices');  
+                 }  
+                 const det = this.determinant();  
+                 if (det === 0) {  
+                   throw new Error('Matrix is singular and cannot be inverted');  
+                 }  
+                 let result = new Matrix(this.rows  this.cols);  
+                 for (let i = 0; i < this.rows; i++) {  
+                   for (let j = 0; j < this.cols; j++) {  
+                     const minor = this.minor(i  j).determinant();  
+                     result.data[j][i] = ((i + j) % 2 === 0 ? 1 : -1) * minor / det;  
+                   }  
+                 }  
+                 return result;  
+               }  
+               
+               static rotateMatrix(matrix) {  
+                 let result = new Matrix(matrix.cols  matrix.rows);  
+                 for (let i = 0; i < matrix.rows; i++) {  
+                   for (let j = 0; j < matrix.cols; j++) {  
+                     result.data[j][matrix.rows - 1 - i] = matrix.data[i][j];  
+                   }  
+                 }  
+                 return result;  
+               }  
+               
+               static scale(matrix  factor) {  
+                 let result = new Matrix(matrix.rows  matrix.cols);  
+                 for (let i = 0; i < matrix.rows; i++) {  
+                   for (let j = 0; j < matrix.cols; j++) {  
+                     result.data[i][j] = matrix.data[i][j] * factor;  
+                   }  
+                 }  
+                 return result;  
+               }  
+               
+               multiplyByScalar(scalar) {  
+                 for (let i = 0; i < this.rows; i++) {  
+                   for (let j = 0; j < this.cols; j++) {  
+                     this.data[i][j] *= scalar;  
+                   }  
+                 }  
+               }  
+               
+               transpose() {  
+                 let result = new Matrix(this.cols  this.rows);  
+                 for (let i = 0; i < this.rows; i++) {  
+                   for (let j = 0; j < this.cols; j++) {  
+                     result.data[j][i] = this.data[i][j];  
+                   }  
+                 }  
+                 return result;  
+               }  
+               
+               static identity(size) {  
+                 let result = new Matrix(size  size);  
+                 for (let i = 0; i < size; i++) {  
+                   result.data[i][i] = 1;  
+                 }  
+                 return result;  
+               }  
+               
+               add(matrix) {  
+                 if (this.rows !== matrix.rows || this.cols !== matrix.cols) {  
+                   throw new Error('Matrices must have the same dimensions to add');  
+                 }  
+                 let result = new Matrix(this.rows  this.cols);  
+                 for (let i = 0; i < this.rows; i++) {  
+                   for (let j = 0; j < this.cols; j++) {  
+                     result.data[i][j] = this.data[i][j] + matrix.data[i][j];  
+                   }  
+                 }  
+                 return result;  
+               }  
+               
+               subtract(matrix) {  
+                 if (this.rows !== matrix.rows || this.cols !== matrix.cols) {  
+                   throw new Error('Matrices must have the same dimensions to subtract');  
+                 }  
+                 let result = new Matrix(this.rows  this.cols);  
+                 for (let i = 0; i < this.rows; i++) {  
+                   for (let j = 0; j < this.cols; j++) {  
+                     result.data[i][j] = this.data[i][j] - matrix.data[i][j];  
+                   }  
+                 }  
+                 return result;  
+               }  
+               
+               static fromArray(array) {  
+                 let rows = array.length;  
+                 let cols = array[0].length;  
+                 let result = new Matrix(rows  cols);  
+                 for (let i = 0; i < rows; i++) {  
+                   for (let j = 0; j < cols; j++) {  
+                     result.data[i][j] = array[i][j];  
+                   }  
+                 }  
+                 return result;  
+               }  
+               
+               toArray() {  
+                 return this.data.map(row => [...row]);  
+               }  
+               
+               static hadamardProduct(a  b) {  
+                 if (a.rows !== b.rows || a.cols !== b.cols) {  
+                   throw new Error('Matrices must have the same dimensions for Hadamard product');  
+                 }  
+                 let result = new Matrix(a.rows  a.cols);  
+                 for (let i = 0; i < a.rows; i++) {  
+                   for (let j = 0; j < a.cols; j++) {  
+                     result.data[i][j] = a.data[i][j] * b.data[i][j];  
+                   }  
+                 }  
+                 return result;  
+               }  
+               
+               static zeroMatrix(rows  cols) {  
+                 return new Matrix(rows  cols);  
+               }  
+               
+               static randomMatrix(rows  cols  min = 0  max = 1) {  
+                 let result = new Matrix(rows  cols);  
+                 for (let i = 0; i < rows; i++) {  
+                   for (let j = 0; j < cols; j++) {  
+                     result.data[i][j] = Math.random() * (max - min) + min;  
+                   }  
+                 }  
+                 return result;  
+               }  
+               
+               static diagonalMatrix(values) {  
+                 let size = values.length;  
+                 let result = new Matrix(size  size);  
+                 for (let i = 0; i < size; i++) {  
+                   result.data[i][i] = values[i];  
+                 }  
+                 return result;  
+               }  
+               
+               static upperTriangular(matrix) {  
+                 let result = new Matrix(matrix.rows  matrix.cols);  
+                 for (let i = 0; i < matrix.rows; i++) {  
+                   for (let j = i; j < matrix.cols; j++) {  
+                     result.data[i][j] = matrix.data[i][j];  
+                   }  
+                 }  
+                 return result;  
+               }  
+               
+               static lowerTriangular(matrix) {  
+                 let result = new Matrix(matrix.rows  matrix.cols);  
+                 for (let i = 0; i < matrix.rows; i++) {  
+                   for (let j = 0; j <= i; j++) {  
+                     result.data[i][j] = matrix.data[i][j];  
+                   }  
+                 }  
+                 return result;  
+               }  
+               
+               static isSymmetric(matrix) {  
+                 if (matrix.rows !== matrix.cols) {  
+                   return false;  
+                 }  
+                 for (let i = 0; i < matrix.rows; i++) {  
+                   for (let j = 0; j < matrix.cols; j++) {  
+                     if (matrix.data[i][j] !== matrix.data[j][i]) {  
+                       return false;  
+                     }  
+                   }  
+                 }  
+                 return true;  
+               }  
+               
+               static isIdentity(matrix) {  
+                 if (matrix.rows !== matrix.cols) {  
+                   return false;  
+                 }  
+                 for (let i = 0; i < matrix.rows; i++) {  
+                   for (let j = 0; j < matrix.cols; j++) {  
+                     if (i === j && matrix.data[i][j] !== 1) {  
+                       return false;  
+                     } else if (i !== j && matrix.data[i][j] !== 0) {  
+                       return false;  
+                     }  
+                   }  
+                 }  
+                 return true;  
+               }  
+               
+             // Extended Example Usage  
+             console.log('Diagonal Matrix with values [1  2  3]:');  
+             const diagonalMatrix = Matrix.diagonalMatrix([1  2  3]);  
+             diagonalMatrix.print();  
+               
+             console.log('Upper Triangular Matrix of Matrix A:');  
+             const upperTriangularMatrix = Matrix.upperTriangular(matrixA);  
+             upperTriangularMatrix.print();  
+               
+             console.log('Lower Triangular Matrix of Matrix A:');  
+             const lowerTriangularMatrix = Matrix.lowerTriangular(matrixA);  
+             lowerTriangularMatrix.print();  
+               
+             console.log('Is Matrix A symmetric?');  
+             console.log(Matrix.isSymmetric(matrixA));  
+               
+             console.log('Is Identity Matrix an identity matrix?');  
+             console.log(Matrix.isIdentity(identityMatrix));  
+               
+             console.log('Random Diagonal Matrix (size 4):');  
+             const randomDiagonalMatrix = Matrix.diagonalMatrix([Math.random()  Math.random()  Math.random()  Math.random()]);  
+             randomDiagonalMatrix.print();  
+               
+             console.log('Random Upper Triangular Matrix (3x3):');  
+             const randomUpperMatrix = Matrix.upperTriangular(Matrix.randomMatrix(3  3  1  10));  
+             randomUpperMatrix.print();  
+               
+             console.log('Random Lower Triangular Matrix (3x3):');  
+             const randomLowerMatrix = Matrix.lowerTriangular(Matrix.randomMatrix(3  3  1  10));  
+             randomLowerMatrix.print(); 
