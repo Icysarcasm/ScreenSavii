@@ -6,27 +6,39 @@
     <title>Bubble Animation</title>
     <style>
         body {
-            background-color: #2b0000; /* Dark red background */
+            background-color: #ffffff; /* Default light mode background */
             margin: 0;
             overflow: hidden; /* Prevent scrollbars */
             position: relative;
             height: 100vh;
+            transition: background-color 0.3s ease, cursor 0.3s ease; /* Smooth transition for background color and cursor */
+        }
+        body.inactive {
+            cursor: none; /* Hide cursor when inactive */
         }
         .bubble {
-            position: absolute;
-            top: 0; /* Start from the top */
-            background-color: rgba(255, 255, 255, 0.5); /* Semi-transparent white */
+            top: -70px; /* Start from the top */
+            background-color: rgba(0, 0, 0, 0.5); /* Default bubble color for light mode */
             border-radius: 50%;
-            animation: fall ease-in infinite, drift ease-in-out infinite; /* Combine fall and drift animations */
+            animation: fall linear 10s;
+            transition: background-color 0.3s ease; /* Smooth transition for bubble color */
+        }
+        .dark-mode .bubble {
+            background-color: rgba(255, 255, 255, 0.5); /* Bubble color for dark mode */
+        }
+        .drift {
+            position: absolute;
+            top: -70px;
+            animation: drift ease-in-out infinite;
         }
         @keyframes fall {
             0% {
-                transform: translateY(0);
+                transform: translateY(-50px);
                 opacity: 1;
             }
             100% {
-                transform: translateY(100vh); /* Move bubble to the bottom */
-                opacity: 0;
+                transform: translateY(110vh); /* Move bubble to the bottom */
+                opacity: .2;
             }
         }
         @keyframes drift {
@@ -37,30 +49,123 @@
                 transform: translateX(20px); /* Slight horizontal movement */
             }
         }
+        .controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            transition: opacity 0.3s ease; /* Smooth fade effect */
+        }
+        .controls.hidden {
+            opacity: 0; /* Hide controls */
+            pointer-events: none; /* Prevent interaction when hidden */
+        }
+        .dark-mode .controls {
+            background: rgba(0, 0, 0, 0.8); /* Dark mode controls background */
+            color: white; /* Text color for dark mode */
+        }
     </style>
 </head>
 <body>
+    <div class="controls">
+        <label for="spawnInterval">Spawn Interval: </label>
+        <input type="range" id="spawnInterval" min="10" max="100" value="50">
+        <span id="intervalValue">50</span> ms
+        <br>
+        <label for="darkModeToggle">Dark Mode: </label>
+        <input type="checkbox" id="darkModeToggle">
+    </div>
     <script>
-        // Function to create a bubble
-        function createBubble() {
-            const bubble = document.createElement('div');
-            const size = Math.random() * 50 + 10; // Random size between 10px and 60px
-            bubble.classList.add('bubble');
-            bubble.style.width = `${size}px`;
-            bubble.style.height = `${size}px`;
-            bubble.style.left = `${Math.random() * 100}vw`; // Random horizontal position
-            bubble.style.animationDuration = `${Math.random() * 3 + 2}s`; // Randomize fall duration
-            bubble.style.animationDelay = `${Math.random()}s`; // Randomize delay
-            document.body.appendChild(bubble);
+        let spawnInterval = 50; // Default spawn interval
+    let intervalId;
+    let inactivityTimeout;
 
-            // Remove the bubble after the animation ends to free up memory
-            bubble.addEventListener('animationend', () => {
-                bubble.remove();
+    // Function to create a bubble
+    function createBubble() {
+        const bubble = document.createElement('div');
+        const size = Math.random() * 50 + 30; // Random size between 10px and 60px
+        bubble.classList.add('bubble');
+        bubble.style.width = `${size}px`;
+        bubble.style.height = `${size}px`;
+        bubble.style.left = `${Math.random() * 100}vw`; // Random horizontal position
+        bubble.style.animationDuration = `${Math.random() * 3 + 2}s`; // Randomize fall duration
+        bubble.style.animationDelay = `${Math.random()}s`; // Randomize delay
+
+        // Add click event listener to remove the bubble when clicked
+        bubble.addEventListener('click', () => {
+            bubble.remove();
+        });
+
+        // Remove the bubble after the animation ends to free up memory
+        bubble.addEventListener('animationend', () => {
+            bubble.remove();
+        });
+
+        return bubble;
+    }
+
+    function createBubbleContainer() {
+        const bubbleContainer = document.createElement('div');
+        bubbleContainer.classList.add('drift');
+        bubbleContainer.style.animationDuration = `${Math.random() * 3 + 2}s`;
+        bubbleContainer.style.left = `${Math.random() * 100}vw`;
+        bubbleContainer.appendChild(createBubble());
+        document.body.appendChild(bubbleContainer);
+    }
+
+    // Function to update the spawn interval
+    function updateSpawnInterval() {
+        clearInterval(intervalId); // Clear the existing interval
+        intervalId = setInterval(createBubbleContainer, spawnInterval); // Set a new interval
+    }
+
+    // Event listener for the slider
+    document.getElementById('spawnInterval').addEventListener('input', (event) => {
+        spawnInterval = parseInt(event.target.value, 10); // Update the spawn interval
+        document.getElementById('intervalValue').textContent = spawnInterval; // Update the displayed value
+        updateSpawnInterval(); // Apply the new interval
+    });
+
+    // Event listener for the dark mode toggle
+    document.getElementById('darkModeToggle').addEventListener('change', (event) => {
+        if (event.target.checked) {
+            document.body.classList.add('dark-mode');
+            document.body.style.backgroundColor = '#000000'; // Set background to black
+            document.querySelectorAll('.bubble').forEach(bubble => {
+                bubble.style.backgroundColor = 'rgba(255, 255, 255, 0.5)'; // Set bubbles to white
+            });
+        } else {
+            document.body.classList.remove('dark-mode');
+            document.body.style.backgroundColor = '#ffffff'; // Set background to white
+            document.querySelectorAll('.bubble').forEach(bubble => {
+                bubble.style.backgroundColor = 'rgba(0, 0, 0, 0.5)'; // Set bubbles to black
             });
         }
+    });
 
-        // Create bubbles at regular intervals
-        setInterval(createBubble, 10); // Create a bubble every 10ms
+    // Function to handle user inactivity
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimeout);
+        document.body.classList.remove('inactive'); // Show cursor
+        document.querySelector('.controls').classList.remove('hidden'); // Show controls
+
+        inactivityTimeout = setTimeout(() => {
+            document.body.classList.add('inactive'); // Hide cursor
+            document.querySelector('.controls').classList.add('hidden'); // Hide controls
+        }, 3000); // 3 seconds of inactivity
+    }
+
+    // Add event listeners for user activity
+    ['mousemove', 'keydown', 'mousedown', 'touchstart'].forEach(event => {
+        document.addEventListener(event, resetInactivityTimer);
+    });
+
+    // Initialize the bubble creation interval and inactivity timer
+    updateSpawnInterval();
+    resetInactivityTimer();
     </script>
 </body>
 </html>

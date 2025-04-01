@@ -22,7 +22,7 @@ function createRaindrop() {
     // Remove the raindrop after it falls
     setTimeout(() => {
         raindrop.remove();
-    }, 5000); // Matches the maximum animation duration
+    }, 6000); // Matches the maximum animation duration
 }
 
 // Function to start generating raindrops
