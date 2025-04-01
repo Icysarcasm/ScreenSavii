@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Floating Buttons on Waves</title>
+    <title>ScreenSavii</title>
     <style>
         body {
             margin: 0;
@@ -69,10 +69,32 @@
         .floating-button:hover .tooltip {
             opacity: 1; /* Show tooltip on hover */
         }
+
+        #header {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 4rem;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            z-index: 1;
+            display: flex;
+            gap: 5px;
+        }
+
+        #header span {
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
     <canvas id="waves"></canvas>
+    <h1 id="header">
+        <span>S</span><span>c</span><span>r</span><span>e</span><span>e</span><span>n</span>
+        <span>S</span><span>a</span><span>v</span><span>i</span><span>i</span>
+    </h1>
     <div class="button-container">
         <a href="Bubblii/" class="floating-button" style="--hover-color: #ff4500;">
             <div class="tooltip">
@@ -128,7 +150,6 @@
             background-color: var(--hover-color);
         }
     </style>
-    </div>
     <script>
         const canvas = document.getElementById('waves');
         const ctx = canvas.getContext('2d');
@@ -141,6 +162,7 @@
         let waveOffset = 0;
 
         const buttons = document.querySelectorAll('.floating-button');
+        const headerSpans = document.querySelectorAll('#header span');
 
         function drawWaves() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -169,6 +191,13 @@
                 const buttonX = rect.left + rect.width / 2 - canvas.getBoundingClientRect().left;
                 const buttonY = Math.sin((buttonX / waveLength) + waveOffset) * waveHeight + canvas.height / 2;
                 button.style.transform = `translateY(${buttonY - canvas.height / 2}px)`;
+            });
+
+            // Make each letter of the header bob with the waves
+            headerSpans.forEach((span, index) => {
+                const spanX = index * 30; // Adjust spacing between letters
+                const spanY = -Math.sin((spanX / waveLength) + waveOffset + index * 0.5) * waveHeight; // Negate the sine wave
+                span.style.transform = `translateY(${spanY}px)`;
             });
 
             requestAnimationFrame(drawWaves);
