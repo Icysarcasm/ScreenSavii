@@ -3,98 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ScreenSavii</title>
+    <title>Floating Buttons on Waves</title>
     <style>
         body {
-            background-color: #2b0000; /* Dark red background */
-            color: #ffffff; /* White text */
-            font-family: Arial, sans-serif;
             margin: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #8B0000, #4B0000); /* Dark red gradient */
+            height: 100vh;
             display: flex;
-            flex-direction: column;
-            justify-content: center; /* Center vertically */
-            align-items: center; /* Center horizontally */
-            height: 100vh; /* Full viewport height */
+            justify-content: center;
+            align-items: center;
         }
-        h1 {
-            color: #ff4d4d; /* Light red for the heading */
-            text-align: center;
-            font-size: 3.5rem; /* Larger font size for the title */
-            margin-bottom: 20px;
-        }
-        .carousel-container {
-            position: relative;
-            width: 80%; /* Full width for the carousel container */
-        }
-        .carousel {
-            display: flex;
-            overflow-x: auto;
-            gap: 20px;
-            padding: 20px;
-            scroll-snap-type: x mandatory;
-            width: 100%; /* Full width for the carousel */
-        }
-        .carousel::before,
-        .carousel::after {
-            content: '';
+
+        canvas {
             position: absolute;
             top: 0;
-            bottom: 0;
-            width: 50px; /* Width of the gradient fade */
-            z-index: 1;
-            pointer-events: none;
-        }
-        .carousel::before {
             left: 0;
-            background: linear-gradient(to right, #2b0000, transparent);
+            width: 100%;
+            height: 100%;
+            z-index: 0;
         }
-        .carousel::after {
-            right: 0;
-            background: linear-gradient(to left, #2b0000, transparent);
+
+        .button-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: flex;
+            gap: 20px;
         }
-        .card {
-            flex: 0 0 300px;
-            background-color: #400000; /* Slightly lighter red for cards */
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            scroll-snap-align: center;
+
+        .floating-button {
+            width: 50px;
+            height: 50px;
+            background-color: #b25e22; /* Firebrick color */
+            border: none;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 1;
+            position: relative;
+        }
+
+        .floating-button:hover {
+            background-color: #ff6a00; /* Orange-red color */
+        }
+
+        .tooltip {
+            position: absolute;
+            bottom: 70px; /* Position above the button */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
             text-align: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 2;
         }
-        .card a {
-            color: #ff9999; /* Light red for links */
-            text-decoration: none;
-            font-size: 20px;
-            font-weight: bold;
-        }
-        .card a:hover {
-            color: #ffffff; /* White on hover */
-            text-decoration: underline;
-        }
-        .card p {
-            margin-top: 10px;
-            font-size: 16px;
-            color: #ffcccc; /* Light red for descriptions */
+
+        .floating-button:hover .tooltip {
+            opacity: 1; /* Show tooltip on hover */
         }
     </style>
 </head>
 <body>
-    <h1>ScreenSavii</h1>
-    <div class="carousel-container">
-        <div class="carousel">
-            <div class="card">
-                <a href="Rainfalli/">Rainfallii</a>
-                <p>Remember better times.</p>
+    <canvas id="waves"></canvas>
+    <div class="button-container">
+        <a href="Bubblii/" class="floating-button" style="--hover-color: #ff4500;">
+            <div class="tooltip">
+            <strong>Bubblii</strong><br>
+            Childlike Wonder
             </div>
-            <div class="card">
-                <a href="Bubblii/">Bubblii</a>
-                <p>Childlike wonder.</p>
+        </a>
+        <a href="Gradii/" class="floating-button" style="--hover-color: #32cd32;">
+            <div class="tooltip">
+            <strong>Gradii</strong><br>
+            Simplistic Peace
             </div>
-            <div class="card">
-                <a href="Gradii/">Gradii</a>
-                <p>Simple is Better.</p>
+        </a>
+        <a href="Matrixii/" class="floating-button" style="--hover-color: #1e90ff;">
+            <div class="tooltip">
+            <strong>Matrixii</strong><br>
+            Classic and Effective
             </div>
-        </div>
+        </a>
+        <a href="Nodeii/" class="floating-button" style="--hover-color: #ff1493;">
+            <div class="tooltip">
+            <strong>Nodeii</strong><br>
+            Thoughts of Code
+            </div>
+        </a>
+        <a href="Rainfalli/" class="floating-button" style="--hover-color: #00ced1;">
+            <div class="tooltip">
+            <strong>Rainfalli</strong><br>
+            Peace in static.
+            </div>
+        </a>
+        <a href="Starii/" class="floating-button" style="--hover-color: #ffa500;">
+            <div class="tooltip">
+            <strong>Starii</strong><br>
+            Staring at Beyond
+            </div>
+        </a>
+        <a href="Pipeii/" class="floating-button" style="--hover-color: #8a2be2;">
+            <div class="tooltip">
+            <strong>Pipeii</strong><br>
+            Industrial Peace
+            </div>
+        </a>
+        <a href="Clockii/" class="floating-button" style="--hover-color: #ff6347;">
+            <div class="tooltip">
+            <strong>Clockii</strong><br>
+            Utility in Time
+            </div>
+        </a>
     </div>
+    <style>
+        .floating-button:hover {
+            background-color: var(--hover-color);
+        }
+    </style>
+    </div>
+    <script>
+        const canvas = document.getElementById('waves');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const waveHeight = 20;
+        const waveLength = 100;
+        const waveSpeed = 0.02;
+        let waveOffset = 0;
+
+        const buttons = document.querySelectorAll('.floating-button');
+
+        function drawWaves() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(139, 0, 0, 0.5)'; // Dark red waves
+            ctx.beginPath();
+
+            for (let x = 0; x < canvas.width; x++) {
+                const y = Math.sin((x / waveLength) + waveOffset) * waveHeight + canvas.height / 2;
+                if (x === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+
+            ctx.lineTo(canvas.width, canvas.height);
+            ctx.lineTo(0, canvas.height);
+            ctx.closePath();
+            ctx.fill();
+
+            waveOffset += waveSpeed;
+
+            // Update button positions to float with the waves
+            buttons.forEach((button, index) => {
+                const rect = button.getBoundingClientRect();
+                const buttonX = rect.left + rect.width / 2 - canvas.getBoundingClientRect().left;
+                const buttonY = Math.sin((buttonX / waveLength) + waveOffset) * waveHeight + canvas.height / 2;
+                button.style.transform = `translateY(${buttonY - canvas.height / 2}px)`;
+            });
+
+            requestAnimationFrame(drawWaves);
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        drawWaves();
+    </script>
 </body>
 </html>

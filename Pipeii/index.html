@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pipeii</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pipeCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('pipeCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const colors = ['#00FF0D', '#FF0000', '#00F2FF', '#F2FF00', '#FFFFFF', '#FF0090'];
+        const pipeWidth = 10;
+        const directions = [
+            { x: 1, y: 0 },
+            { x: -1, y: 0 },
+            { x: 0, y: 1 },
+            { x: 0, y: -1 }
+        ];
+
+        let pipes = [{ x: canvas.width / 2, y: canvas.height / 2, dir: randomDirection(), color: randomColor() }];
+
+        function randomDirection() {
+            return directions[Math.floor(Math.random() * directions.length)];
+        }
+
+        function randomColor() {
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function drawPipe(pipe) {
+            ctx.fillStyle = pipe.color;
+            ctx.fillRect(pipe.x, pipe.y, pipeWidth, pipeWidth);
+        }
+
+        function updatePipe(pipe) {
+            pipe.x += pipe.dir.x * pipeWidth;
+            pipe.y += pipe.dir.y * pipeWidth;
+
+            if (pipe.x < 0 || pipe.x >= canvas.width || pipe.y < 0 || pipe.y >= canvas.height || Math.random() < 0.1) {
+                pipe.dir = randomDirection();
+                pipe.color = randomColor();
+            }
+        }
+
+        function animate() {
+            pipes.forEach(pipe => {
+                drawPipe(pipe);
+                updatePipe(pipe);
+            });
+
+            if (Math.random() < 0.02) {
+                pipes.push({ x: pipes[0].x, y: pipes[0].y, dir: randomDirection(), color: randomColor() });
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

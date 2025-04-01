@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nodeii</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: black;
+        }
+        canvas {
+            display: block;
+        }
+        #colorButton, #particleSlider {
+            position: absolute;
+            bottom: 20px;
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 1000;
+        }
+        #colorButton {
+            right: 20px;
+        }
+        #particleSlider {
+            left: 20px;
+        }
+        #particleSlider input {
+            width: 150px;
+        }
+        #colorButton:hover, #particleSlider:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="screensaver"></canvas>
+    <button id="colorButton">Change Color</button>
+    <div id="particleSlider">
+        <label for="slider">Particles: </label>
+        <input type="range" id="slider" min="10" max="500" value="100">
+    </div>
+    <script>
+        const canvas = document.getElementById('screensaver');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    
+        const colors = ['#00FF0D', '#FF0000', '#00F2FF', '#F2FF00', '#FFFFFF', '#FF0090'];
+        const particles = [];
+        let randomColor = colors[Math.floor(Math.random() * colors.length)];
+        let particleCount = 100; // Default particle count
+        const cursor = { x: null, y: null, radius: 100, isMoving: false }; // Cursor position, radius, and movement state
+    
+        let cursorMoveTimeout;
+    
+        class Particle {
+            constructor(x, y, size, speedX, speedY) {
+                this.x = x;
+                this.y = y;
+                this.size = size;
+                this.color = randomColor;
+                this.speedX = speedX;
+                this.speedY = speedY;
+            }
+    
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+    
+            update() {
+                // Move the particle
+                this.x += this.speedX;
+                this.y += this.speedY;
+    
+                // Bounce off canvas edges
+                if (this.x + this.size > canvas.width || this.x - this.size < 0) {
+                    this.speedX *= -1;
+                }
+                if (this.y + this.size > canvas.height || this.y - this.size < 0) {
+                    this.speedY *= -1;
+                }
+    
+                // Repel from the cursor only if the cursor is moving
+                if (cursor.isMoving) {
+                    const dx = this.x - cursor.x;
+                    const dy = this.y - cursor.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+                    if (distance < cursor.radius) {
+                        const angle = Math.atan2(dy, dx);
+                        const force = (cursor.radius - distance) / cursor.radius; // Repelling force
+                        const repelX = Math.cos(angle) * force * 5; // Adjust multiplier for strength
+                        const repelY = Math.sin(angle) * force * 5;
+    
+                        this.x += repelX;
+                        this.y += repelY;
+                    }
+                }
+            }
+        }
+    
+        function initParticles() {
+            particles.length = 0; // Clear existing particles
+            for (let i = 0; i < particleCount; i++) {
+                const size = Math.random() * 5 + 2;
+                const x = Math.random() * canvas.width;
+                const y = Math.random() * canvas.height;
+                const speedX = (Math.random() - 0.5) * 2;
+                const speedY = (Math.random() - 0.5) * 2;
+                particles.push(new Particle(x, y, size, speedX, speedY));
+            }
+        }
+    
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            connectParticles();
+            requestAnimationFrame(animate);
+        }
+    
+        function connectParticles() {
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = randomColor;
+                        ctx.lineWidth = 0.5;
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+    
+        // Update cursor position and detect movement
+        window.addEventListener('mousemove', (event) => {
+            cursor.x = event.clientX;
+            cursor.y = event.clientY;
+            cursor.isMoving = true;
+    
+            // Reset the movement state after a short delay
+            clearTimeout(cursorMoveTimeout);
+            cursorMoveTimeout = setTimeout(() => {
+                cursor.isMoving = false;
+            }, 100); // 100ms delay to detect if the cursor stops moving
+        });
+    
+        // Reset cursor position when the mouse leaves the canvas
+        window.addEventListener('mouseout', () => {
+            cursor.x = null;
+            cursor.y = null;
+            cursor.isMoving = false;
+        });
+    
+        document.getElementById('colorButton').addEventListener('click', () => {
+            randomColor = colors[Math.floor(Math.random() * colors.length)];
+            particles.forEach(particle => {
+                particle.color = randomColor;
+            });
+        });
+    
+        document.getElementById('slider').addEventListener('input', (event) => {
+            particleCount = parseInt(event.target.value, 10);
+            initParticles(); // Reinitialize particles with the new count
+        });
+    
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            initParticles(); // Reinitialize particles on resize
+        });
+    
+        initParticles();
+        animate();
+    </script>
+</body>
+</html>
