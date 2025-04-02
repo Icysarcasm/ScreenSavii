@@ -3,12 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aurora Borealis Screensaver</title>
+    <title>Aurorii</title>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background: black;
+            background: linear-gradient(to bottom, #001d3d, #003566);
+            height: 100vh;
+        }
+
+        .mountains {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 30%;
+            background: linear-gradient(to top, #0a2e36, #1b4d5c);
+            clip-path: polygon(0% 100%, 20% 60%, 40% 100%, 60% 70%, 80% 100%, 100% 80%, 100% 100%);
         }
 
         .aurora {
@@ -16,48 +26,143 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
-            background: linear-gradient(120deg, rgba(0, 255, 128, 0.2), rgba(0, 128, 255, 0.2), rgba(255, 0, 255, 0.2));
-            animation: auroraMove 10s infinite alternate ease-in-out;
-            filter: blur(100px);
+            height: 70%;
+            background: linear-gradient(120deg, rgba(0, 255, 170, 0.3), rgba(0, 200, 255, 0.3), rgba(255, 0, 200, 0.3), rgba(0, 0, 0, 0));
+            background-size: 200% 200%;
+            animation: aurora-animation 5s infinite alternate ease-in-out, aurora-wave 10s infinite linear;
+            filter: blur(50px);
         }
 
-        @keyframes auroraMove {
+        .aurora:nth-child(2) {
+            animation-duration: 6s, 12s;
+        }
+
+        .aurora:nth-child(3) {
+            animation-duration: 7s, 14s;
+        }
+
+        @keyframes aurora-animation {
             0% {
-                transform: translate(-20%, -20%) scale(1.2);
-            }
-            50% {
-                transform: translate(20%, 20%) scale(1.5);
+                transform: translate(-10%, 0) scale(1);
             }
             100% {
-                transform: translate(-10%, -10%) scale(1.3);
+                transform: translate(10%, 10%) scale(1.2);
             }
         }
 
-        .stars {
+        @keyframes aurora-wave {
+            0% {
+                background-position: 0% 50%;
+            }
+            100% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .quote {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(white, rgba(255, 255, 255, 0)) 1px 1px;
-            background-size: 3px 3px;
-            opacity: 0.5;
-            animation: twinkle 2s infinite alternate;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2rem;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
         }
 
-        @keyframes twinkle {
-            0% {
-                opacity: 0.3;
-            }
-            100% {
-                opacity: 0.6;
-            }
+        .quote.visible {
+            opacity: 1;
         }
     </style>
 </head>
 <body>
     <div class="aurora"></div>
-    <div class="stars"></div>
+    <div class="aurora"></div>
+    <div class="aurora"></div>
+    <div class="mountains"></div>
+    <div class="quote" id="quote"></div>
+
+    <script>
+        const quotes = [
+            "The best way to predict the future is to create it.",
+            "Believe you can and you're halfway there.",
+            "Success is not final, failure is not fatal: It is the courage to continue that counts.",
+            "Act as if what you do makes a difference. It does.",
+            "Keep your face always toward the sunshine—and shadows will fall behind you.",
+            "It is okay to not be okay. Just don't give up.",
+            "The only limit to our realization of tomorrow will be our doubts of today.",
+            "You are never too old to set another goal or to dream a new dream.",
+            "Somebody belives in you.",
+            "You are braver than you believe, stronger than you seem, and smarter than you think.",
+            "I trust you.",
+            "You are enough just as you are.",
+            "You are doing great.",
+            "You are not alone.",
+            "You are loved.",
+            "You are worthy.",
+            "You are capable of amazing things.",
+            "You are a work in progress.",
+            "Steamed Hams.",
+            "You are a masterpiece.",
+            "You are a gift to the world.",
+            "Psst. check out the other screensavers.",
+            "You are a ray of sunshine.",
+            "You are a star.",
+            "There's a lesson in failure, so listen to it.",
+            "Trust the process.",
+            "Somebody is struggling just as you are, be the inspiration they need to keep going.",
+            "You ever play Bejeweld 3? This is like that.",
+            "Hey ya'll, Scott here. - Scott the Woz",
+            "Oh hey, I didn't see you there. - Scott the Woz",
+            "Why are you still here? - Scott the Woz",
+            "There's a penny on the ground somehwere waiting for you.",
+            "Hang on, i dropped my quote, gimme a second.",
+            "Ah yes, the classic 'I don't know what to say' quote.",
+            "You are a unique individual with your own strengths and weaknesses.",
+            "Generic motivational quote. - Icysarcasm",
+            "Play cookie clicker, it's a great game. - cookieclickerfan4ever",
+            "Aurora Borealis, at this time of year, at this time of day, in this part of the country, localized entirely within your browser?",
+            "Fake quotes? In this website? It's more likely than you think. (Plus 9 more shocking truths about celebrities)",
+            "A lot of these aren't even quotes, just random phrases.",
+            "Don't listen to that other guy, cookie clicker sucks. - cookiehater45",
+            "You are a diamond in the rough.",
+            "You are a beautiful soul.",
+            "You are a beacon of light.",
+            "SEA SALT!!!",
+            "Are you sure?",
+            "Where is Omniman?",
+            "There's plenty of fish in the sea, beacuse it's really, really big.",
+            "Thank god fish aren't into cash.",
+            "Man, I love fish.",
+            "Fish are friends, not food.",
+            "Fish are the best.",
+            "Fish are the future.",
+            "Fish are the answer.",
+            "Fish are the key to happiness.",
+            "Fish are the meaning of life.",
+            "Fish are the reason for the season.",
+            "Fish are the solution to all your problems.",
+            "Why are there so many Fish in this website?",
+            "Fish are the best thing since sliced bread.",
+            "Fish ARE sliced bread.",
+            "Thank god i'm not a fish. - A fish",
+            "Hot quotes near you, <a href='Why/' target='_blank' style='color: lightblue; text-decoration: underline;'>click here to find out more</a>.",
+                ];
+
+        const quoteElement = document.getElementById('quote');
+
+        function showRandomQuote() {
+            const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+            quoteElement.textContent = randomQuote;
+            quoteElement.classList.add('visible');
+
+            setTimeout(() => {
+                quoteElement.classList.remove('visible');
+            }, 3000); // Quote stays visible for 3 seconds
+        }
+
+        setInterval(showRandomQuote, 8000); // Show a new quote every 8 seconds
+    </script>
 </body>
 </html>
