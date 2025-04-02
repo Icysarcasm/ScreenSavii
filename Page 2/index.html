@@ -8,7 +8,7 @@
         body {
             margin: 0;
             overflow: hidden;
-            background: linear-gradient(to bottom, #8B0000, #4B0000); /* Dark red gradient */
+            background: linear-gradient(to bottom, #013220, #004d26); /* Dark green gradient */
             height: 100vh;
             display: flex;
             justify-content: center;
@@ -36,7 +36,7 @@
         .floating-button {
             width: 50px;
             height: 50px;
-            background-color: #b25e22; /* Firebrick color */
+            background-color: #2e8b57; /* Sea green color */
             border: none;
             border-radius: 50%;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
@@ -46,7 +46,7 @@
         }
 
         .floating-button:hover {
-            background-color: #ff6a00; /* Orange-red color */
+            background-color: #3cb371; /* Medium sea green color */
         }
 
         .tooltip {
@@ -93,75 +93,24 @@
     <canvas id="waves"></canvas>
     <h1 id="header">
         <span>S</span><span>c</span><span>r</span><span>e</span><span>e</span><span>n</span>
-        <span>S</span><span>a</span><span>v</span><span>i</span><span>i</span>
+        <span>S</span><span>a</span><span>v</span><span>i</span><span>i</span><span>2</span>
     </h1>
     <div class="button-container">
-        <a href="Bubblii/" class="floating-button" style="--hover-color: #ff4500;">
+        <a href="javascript:history.back()" class="floating-button" style="--hover-color: #3cb371;">
             <div class="tooltip">
-            <strong>Bubblii</strong><br>
-            Childlike Wonder
+            <strong>Page 1</strong><br>
+            Back to Basics.
             </div>
         </a>
-        <a href="Gradii/" class="floating-button" style="--hover-color: #32cd32;">
+        <a href="Bounceii/" class="floating-button" style="--hover-color: #3cb371;">
             <div class="tooltip">
-            <strong>Gradii</strong><br>
-            Simplistic Peace
+            <strong>Bounceii</strong><br>
+            Dreams of Simplicity
             </div>
         </a>
-        <a href="Matrixii/" class="floating-button" style="--hover-color: #1e90ff;">
-            <div class="tooltip">
-            <strong>Matrixii</strong><br>
-            Classic and Effective
-            </div>
-        </a>
-        <a href="Nodeii/" class="floating-button" style="--hover-color: #ff1493;">
-            <div class="tooltip">
-            <strong>Nodeii</strong><br>
-            Thoughts of Code
-            </div>
-        </a>
-        <a href="Rainfalli/" class="floating-button" style="--hover-color: #00ced1;">
-            <div class="tooltip">
-            <strong>Rainfalli</strong><br>
-            Peace in static.
-            </div>
-        </a>
-        <a href="Starii/" class="floating-button" style="--hover-color: #ffa500;">
-            <div class="tooltip">
-            <strong>Starii</strong><br>
-            Staring at Beyond
-            </div>
-        </a>
-        <a href="Pipeii/" class="floating-button" style="--hover-color: #8a2be2;">
-            <div class="tooltip">
-            <strong>Pipeii</strong><br>
-            Industrial Peace
-            </div>
-        </a>
-        <a href="Clockii/" class="floating-button" style="--hover-color: #ff6347;">
-            <div class="tooltip">
-            <strong>Clockii</strong><br>
-            Utility in Time
-            </div>
-        </a>
-        <a href="Codeii/" class="floating-button" style="--hover-color: #2fff00;">
-            <div class="tooltip">
-            <strong>Codeii</strong><br>
-            Imitation of Knowledge
-            </div>
-        </a>
-        <a href="Snowii/" class="floating-button" style="--hover-color: #dcd0ce;">
-            <div class="tooltip">
-            <strong>Snowii</strong><br>
-            Cold in Comfort
-            </div>
-        </a>
-        <a href="Orbitii/" class="floating-button" style="--hover-color: #1e1e1e;">
-            <div class="tooltip">
-            <strong>Orbitii</strong><br>
-            Surrounded by Curiosity
-            </div>
-        </a>
+
+
+
     </div>
     <style>
         .floating-button:hover {
@@ -184,7 +133,7 @@
 
         function drawWaves() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(139, 0, 0, 0.5)'; // Dark red waves
+            ctx.fillStyle = 'rgba(0, 100, 0, 0.5)'; // Dark green waves
             ctx.beginPath();
 
             for (let x = 0; x < canvas.width; x++) {

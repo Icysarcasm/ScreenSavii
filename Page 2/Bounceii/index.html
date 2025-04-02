@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bounceii</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: black;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="screensaver"></canvas>
+    <script>
+        const canvas = document.getElementById('screensaver');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const balls = [];
+        const gravity = 0.5;
+        const friction = 0.9;
+        let mouse = { x: 0, y: 0 };
+
+        class Ball {
+            constructor(x, y, radius, color, dx, dy) {
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.color = color;
+                this.dx = dx;
+                this.dy = dy;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            update() {
+                if (this.y - this.radius > canvas.height) {
+                    this.y = -this.radius;
+                    this.x = Math.random() * (canvas.width - this.radius * 2) + this.radius;
+                    this.dy = (Math.random() - 0.5) * 4;
+                    this.dx = (Math.random() - 0.5) * 4;
+                } else {
+                    this.dy += gravity;
+                }
+
+                if (this.x + this.radius + this.dx > canvas.width || this.x - this.radius <= 0) {
+                    this.dx = -this.dx * friction;
+                }
+
+                this.x += this.dx;
+                this.y += this.dy;
+
+                // Check collision with mouse
+                const dist = Math.hypot(mouse.x - this.x, mouse.y - this.y);
+                if (dist < this.radius) {
+                    this.dx = -this.dx;
+                    this.dy = -this.dy;
+                }
+
+                this.draw();
+            }
+        }
+
+        function randomColor() {
+            const colors = ['#FF5733', '#33FF57', '#3357FF', '#F3FF33', '#FF33F3'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function init() {
+            for (let i = 0; i < 50; i++) {
+                const radius = Math.random() * 20 + 10;
+                const x = Math.random() * (canvas.width - radius * 2) + radius;
+                const y = Math.random() * (canvas.height - radius * 2) + radius;
+                const dx = (Math.random() - 0.5) * 4;
+                const dy = (Math.random() - 0.5) * 4;
+                const color = randomColor();
+                balls.push(new Ball(x, y, radius, color, dx, dy));
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            balls.forEach(ball => ball.update());
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            balls.length = 0;
+            init();
+        });
+
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = event.clientX;
+            mouse.y = event.clientY;
+        });
+
+        window.addEventListener('keydown', (event) => {
+            if (event.code === 'Space') {
+                balls.forEach(ball => {
+                    ball.dy = -Math.random() * 10 - 10;
+                });
+            }
+        });
+
+        init();
+        animate();
+    </script>
+</body>
+</html>

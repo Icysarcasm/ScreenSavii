@@ -245,7 +245,7 @@
         // Add rotating galaxy core
         function drawGalaxyCore() {
             const coreRadius = 20;
-            const coreColor = `hsl(${Math.random() * 360}, 70%, 50%)`;
+            const coreColor = `rgba(255, 255, 255, 0.8)`;
             ctx.beginPath();
             ctx.arc(canvas.width / 2, canvas.height / 2, coreRadius, 0, Math.PI * 2);
             ctx.fillStyle = coreColor;
