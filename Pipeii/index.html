@@ -17,14 +17,36 @@
 </head>
 <body>
     <canvas id="pipeCanvas"></canvas>
+    <div id="ui" style="position:fixed;left:12px;top:12px;z-index:9999;color:#fff;font-family:Arial,Helvetica,sans-serif;font-size:13px;">
+        <label for="fadeRange" style="display:inline-block;margin-right:8px;">Fade (sec):</label>
+        <input id="fadeRange" type="range" min="0.25" max="5" step="0.01" value="2" />
+        <span id="fadeVal" style="display:inline-block;width:44px;text-align:right;margin-left:8px;">2.00</span>
+    </div>
     <script>
         const canvas = document.getElementById('pipeCanvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+
+        // Handle device pixel ratio so pipes stay sharp on HiDPI screens
+        let dpr = window.devicePixelRatio || 1;
+        let vw = window.innerWidth;
+        let vh = window.innerHeight;
+
+        function resizeCanvas() {
+            dpr = window.devicePixelRatio || 1;
+            vw = window.innerWidth;
+            vh = window.innerHeight;
+            canvas.width = Math.floor(vw * dpr);
+            canvas.height = Math.floor(vh * dpr);
+            canvas.style.width = vw + 'px';
+            canvas.style.height = vh + 'px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
 
         const colors = ['#00FF0D', '#FF0000', '#00F2FF', '#F2FF00', '#FFFFFF', '#FF0090'];
-        const pipeWidth = 10;
+        const pipeWidth = 12;
         const directions = [
             { x: 1, y: 0 },
             { x: -1, y: 0 },
@@ -32,7 +54,8 @@
             { x: 0, y: -1 }
         ];
 
-        let pipes = [{ x: canvas.width / 2, y: canvas.height / 2, dir: randomDirection(), color: randomColor() }];
+        // Start pipes in the center (CSS pixels coordinates)
+        let pipes = [{ x: Math.floor(vw / 2 / pipeWidth) * pipeWidth, y: Math.floor(vh / 2 / pipeWidth) * pipeWidth, dir: randomDirection(), color: randomColor() }];
 
         function randomDirection() {
             return directions[Math.floor(Math.random() * directions.length)];
@@ -42,28 +65,126 @@
             return colors[Math.floor(Math.random() * colors.length)];
         }
 
+        function hexToRgb(hex) {
+            hex = hex.replace('#','');
+            const bigint = parseInt(hex, 16);
+            return [(bigint >> 16) & 255, (bigint >> 8) & 255, bigint & 255];
+        }
+
+        function colorFactor(hex, factor) {
+            const [r,g,b] = hexToRgb(hex);
+            const rr = Math.min(255, Math.max(0, Math.round(r * factor)));
+            const gg = Math.min(255, Math.max(0, Math.round(g * factor)));
+            const bb = Math.min(255, Math.max(0, Math.round(b * factor)));
+            return `rgb(${rr}, ${gg}, ${bb})`;
+        }
+
+        function drawRoundedRect(x, y, w, h, r) {
+            const radius = Math.min(r, w/2, h/2);
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + w - radius, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+            ctx.lineTo(x + w, y + h - radius);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+            ctx.lineTo(x + radius, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
         function drawPipe(pipe) {
-            ctx.fillStyle = pipe.color;
-            ctx.fillRect(pipe.x, pipe.y, pipeWidth, pipeWidth);
+            const x = pipe.x;
+            const y = pipe.y;
+            const w = pipeWidth;
+            const h = pipeWidth;
+
+            // subtle shadow for depth
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = 'rgba(0,0,0,0.6)';
+
+            // Create directional gradient so the pipe looks 3D depending on direction
+            let grad;
+            if (pipe.dir.x === 1) {
+                grad = ctx.createLinearGradient(x, y, x + w, y);
+            } else if (pipe.dir.x === -1) {
+                grad = ctx.createLinearGradient(x + w, y, x, y);
+            } else if (pipe.dir.y === 1) {
+                grad = ctx.createLinearGradient(x, y, x, y + h);
+            } else {
+                grad = ctx.createLinearGradient(x, y + h, x, y);
+            }
+
+            const dark = colorFactor(pipe.color, 0.6);
+            const mid = colorFactor(pipe.color, 0.9);
+            const light = colorFactor(pipe.color, 1.4);
+
+            grad.addColorStop(0, dark);
+            grad.addColorStop(0.5, mid);
+            grad.addColorStop(1, light);
+
+            // Base rounded rect (the body)
+            ctx.fillStyle = grad;
+            drawRoundedRect(x + 0.5, y + 0.5, w - 1, h - 1, 3);
+            ctx.fill();
+
+            // Inner highlight for a glossy effect
+            ctx.shadowBlur = 0;
+            const highlight = ctx.createLinearGradient(x, y, x + w, y + h);
+            highlight.addColorStop(0, 'rgba(255,255,255,0.25)');
+            highlight.addColorStop(0.6, 'rgba(255,255,255,0.06)');
+            highlight.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = highlight;
+            drawRoundedRect(x + 2, y + 2, w - 4, h - 4, 2);
+            ctx.fill();
         }
 
         function updatePipe(pipe) {
             pipe.x += pipe.dir.x * pipeWidth;
             pipe.y += pipe.dir.y * pipeWidth;
 
-            if (pipe.x < 0 || pipe.x >= canvas.width || pipe.y < 0 || pipe.y >= canvas.height || Math.random() < 0.1) {
+            // Bounce / re-direction when hitting edges or randomly change direction
+            if (pipe.x < 0 || pipe.x >= vw || pipe.y < 0 || pipe.y >= vh || Math.random() < 0.08) {
                 pipe.dir = randomDirection();
                 pipe.color = randomColor();
             }
         }
 
-        function animate() {
+        let fadeSeconds = 2.0; // default fade time in seconds
+        let lastTime = performance.now();
+
+        // wire up UI controls
+        const fadeRange = document.getElementById('fadeRange');
+        const fadeVal = document.getElementById('fadeVal');
+        fadeRange.addEventListener('input', (e) => {
+            fadeSeconds = parseFloat(e.target.value);
+            fadeVal.textContent = fadeSeconds.toFixed(2);
+        });
+
+        function animate(timestamp) {
+                // Fade previous frames slightly by overlaying a translucent black rectangle.
+                // Alpha is computed per-frame from the user-controlled fadeSeconds value so
+                // trails fade away over approximately that many seconds.
+                const now = timestamp || performance.now();
+                let dt = now - lastTime;
+                if (!isFinite(dt) || dt <= 0) dt = 16.67; // default ~60fps
+                lastTime = now;
+
+                // alpha is proportion of fade time consumed by this frame: dt / fadeSeconds
+                // clamp so alpha stays between 0 and 1
+                const alpha = Math.min(1, dt / (fadeSeconds * 1000));
+                ctx.fillStyle = `rgba(0,0,0,${alpha})`;
+                ctx.fillRect(0, 0, vw, vh);
+
+            // Draw pipes on top of the faded canvas
             pipes.forEach(pipe => {
                 drawPipe(pipe);
                 updatePipe(pipe);
             });
 
-            if (Math.random() < 0.02) {
+            // Occasionally spawn a new branch from the lead pipe
+            if (Math.random() < 0.02 && pipes.length < 200) {
                 pipes.push({ x: pipes[0].x, y: pipes[0].y, dir: randomDirection(), color: randomColor() });
             }
 
